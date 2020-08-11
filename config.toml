@@ -1,0 +1,10 @@
+[project]
+name = "Library Management Backend Server"
+description = "Library management backend server for the Vue.Js library management app"
+version = "0.0.1"
+author = "Sergen Pekşen"
+
+[database]
+path = ["db", "library.sqlite"]
+user = ""
+password = ""
