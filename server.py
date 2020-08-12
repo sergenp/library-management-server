@@ -1,5 +1,5 @@
-from initialize import get_app
+from initialize import app
 
 
 if __name__ == '__main__':
-    get_app().run(debug=True)
+    app.run(debug=True)
