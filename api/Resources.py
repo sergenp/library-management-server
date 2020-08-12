@@ -2,9 +2,6 @@ from flask import request
 from flask_restful import Resource
 from models.Models import AuthorModel, BookModel, db
 
-class HelloWorld(Resource):
-    def get(self):
-        return {'hello': 'world'}
 
 class Author(Resource):
     def get(self, author_id):
