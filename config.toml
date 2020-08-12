@@ -7,6 +7,6 @@ version = "0.0.1"
 author = "Sergen Pekşen"
 
 [database]
-path = ["library.sqlite"] # add directories as a list element, these gets appended to the path where database.py is in
+path = ["..", "library.sqlite"] # add directories as list elements, these gets appended to the path where database.py is in
 user = ""
 password = ""
