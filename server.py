@@ -8,12 +8,13 @@ from models.Models import CategoryModel, AuthorModel, BookModel
 
 db.create_all()
 app.config['UPLOAD_FOLDER'] = os.path.join(*config.get("file").get("path"))
+app.config['BUNDLE_ERROR'] = config.get('app_configs').get("bundle_error")
 api = Api(app)
 api.add_resource(Book, '/books/<int:book_id>', '/books')
 api.add_resource(Author, '/authors/<int:author_id>', '/authors')
 api.add_resource(Category, '/categories/<int:category_id>', '/categories')
 
-@app.route('/files/<filename>')
+@app.route('/files/<path:filename>')
 def uploaded_file(filename):
     return send_from_directory(app.config['UPLOAD_FOLDER'],
                                filename)

@@ -12,4 +12,9 @@ user = ""
 password = ""
 
 [file]
-path = ["./files"] # files path that files are going to be saved
+path = ["./files"] # files path that files are going to be saved, relative to Resources.py
+
+[app_configs]
+# for bundling errors if post request fails, 
+# see https://flask-restful.readthedocs.io/en/latest/reqparse.html#error-handling
+bundle_errors = true
