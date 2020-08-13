@@ -7,7 +7,7 @@ from sqlalchemy.exc import IntegrityError
 from werkzeug.utils import secure_filename
 from flask import request
 from flask_restful import Resource, reqparse
-from models.Models import CategoryModel, AuthorModel, BookModel, db
+from models.Models import CategoryModel, AuthorModel, BookModel, PublisherModel, db
 
 
 ALLOWED_IMAGE_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
@@ -48,6 +48,20 @@ class Category(Resource):
         db.session.commit()
         return {'data' : { "category" : category.to_dict()}}, 201
 
+class Publisher(Resource):
+    def get(self, publisher_id):
+        publisher = PublisherModel.query.get_or_404(publisher_id, description="Publisher is not found")
+        return {'data' : {'publisher' : publisher.to_dict()}}, 200
+
+    def post(self):
+        parser = reqparse.RequestParser()
+        parser.add_argument('name', type=str, help="name field is required")
+        data = parser.parse_args()
+        publisher = PublisherModel(name=data['name'])
+        db.session.add(publisher)
+        db.session.commit()
+        return {'data' : { "publisher" : publisher.to_dict()}}, 201
+
 class Book(Resource):
     def get(self, book_id):
         book = BookModel.query.get_or_404(book_id, description="Book is not found")
@@ -60,6 +74,7 @@ class Book(Resource):
         parser.add_argument('category_id', type=int, help="category_id field is required", required=True)
         parser.add_argument('published_date', type=str, help="published_date field is required", required=True)
         parser.add_argument('book_cover', type=werkzeug.datastructures.FileStorage, location='files', help=f"You must provide a book cover image, allowed extensions are {','.join(ALLOWED_IMAGE_EXTENSIONS)}", required=True)
+        parser.add_argument('publisher_id', type=str, help="publisher_id field is required", required=True)
         data = parser.parse_args()
         
         if allowed_image(data['book_cover'].filename):
@@ -69,12 +84,14 @@ class Book(Resource):
 
         author = AuthorModel.query.filter_by(id=data['author_id']).first_or_404(description=f"Author with id {data['author_id']} is not found")
         category = CategoryModel.query.filter_by(id=data['category_id']).first_or_404(description=f"Category with id {data['category_id']} is not found")
+        publisher = PublisherModel.query.filter_by(id=data['publisher_id']).first_or_404(description=f"Publisher with id {data['publisher_id']} is not found")
+  
         try:
             published_date = datetime.strptime(data['published_date'], '%d/%m/%Y')
         except ValueError:
             return {'message' : 'Given date is not in the format of %d/%m/%Y'}, 400
 
-        new_book = BookModel(name=data['name'], published_date=published_date, author=author, category=category, book_cover=filename)
+        new_book = BookModel(name=data['name'], published_date=published_date, author=author, category=category, book_cover=filename, publisher=publisher)
         try:
             db.session.add(new_book)
             db.session.commit()

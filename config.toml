@@ -18,3 +18,5 @@ path = ["./files"] # files path that files are going to be saved, relative to Re
 # for bundling errors if post request fails, 
 # see https://flask-restful.readthedocs.io/en/latest/reqparse.html#error-handling
 bundle_errors = true
+debug_mode = true
+secret_key = '_5#y2L"F4Q8z\n\xec]/'
