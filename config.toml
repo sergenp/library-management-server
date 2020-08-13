@@ -10,3 +10,6 @@ author = "Sergen Pekşen"
 path = ["..", "library.sqlite"] # add directories as list elements, these gets appended to the path where database.py is in
 user = ""
 password = ""
+
+[file]
+path = ["./files"] # files path that files are going to be saved

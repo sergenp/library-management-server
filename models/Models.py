@@ -17,13 +17,15 @@ class CategoryModel(db.Model, SerializerMixin):
 
 
 class BookModel(db.Model, SerializerMixin):
+    datetime_format = '%d/%m/%Y'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String, unique=True, nullable=False)
     published_date = db.Column(db.DateTime, nullable=True)
+    book_cover = db.Column(db.String, unique=True, nullable=False)
     author = db.relationship("AuthorModel")
     category = db.relationship("CategoryModel")
-    author_id = db.Column(db.Integer, db.ForeignKey('author_model.id'))
-    category_id = db.Column(db.Integer, db.ForeignKey('category_model.id'))
+    author_id = db.Column(db.Integer, db.ForeignKey('author_model.id'), nullable=False)
+    category_id = db.Column(db.Integer, db.ForeignKey('category_model.id'), nullable=False)
 
     def __repr__(self):
         return '<Book %r>' % self.name
