@@ -7,24 +7,7 @@ from sqlalchemy.exc import IntegrityError
 from werkzeug.utils import secure_filename
 from flask_restful import Resource, reqparse
 from models.LibraryModels import CategoryModel, AuthorModel, BookModel, PublisherModel
-
-
-ALLOWED_IMAGE_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
-CONFIG = toml.load("./config.toml")
-UPLOAD_FOLDER = "/".join(CONFIG.get("file").get("path"))
-
-
-def check_image(image_name):
-    print(image_name)
-    if '.' in image_name and \
-           image_name.rsplit('.', 1)[1].lower() in ALLOWED_IMAGE_EXTENSIONS:
-        return f"{uuid.uuid1()}.{image_name.split('.')[1]}"
-    else:
-        return ""
-
-
-def date_type(x): return datetime.strptime(x, '%d/%m/%Y')
-
+from .resource_util import UPLOAD_FOLDER, ALLOWED_IMAGE_EXTENSIONS, check_image, date_type
 
 class Author(Resource):
     def get(self, author_id):
