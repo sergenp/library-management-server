@@ -7,7 +7,7 @@ version = "0.0.1"
 author = "Sergen Pekşen"
 
 [database]
-path = ["..", "library.sqlite"] # the directory library.sqlite is going to be created, this path is relative to where database.py is in
+path = ["db", "library.sqlite"] # the directory library.sqlite is going to be created, this path is relative to where initialize.py is in
 user = ""
 password = ""
 
@@ -15,9 +15,12 @@ password = ""
 path = ["./files"] # files path that files are going to be saved, relative to Resources.py
 
 [app_configs]
-# for bundling errors if post request fails, 
+# for bundling errors, if post requests fails, 
 # see https://flask-restful.readthedocs.io/en/latest/reqparse.html#error-handling
 bundle_errors = true
 debug_mode = true
-secret_key = '_5#y2L"F4Q8z\n\xec]/'
+secret_key = '_5#y2L"F4Q8z\n\xec]/' # change me in production environment
 port=5000
+
+[bcrypt]
+bcrypt_log_rounds = 10

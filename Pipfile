@@ -13,6 +13,7 @@ flask-restful = "*"
 toml = "*"
 flask-sqlalchemy = "*"
 sqlalchemy-serializer = "*"
+flask-bcrypt = "*"
 
 [requires]
 python_version = "3.8"

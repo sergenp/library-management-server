@@ -5,9 +5,8 @@ import uuid
 from datetime import datetime
 from sqlalchemy.exc import IntegrityError
 from werkzeug.utils import secure_filename
-from flask import request
 from flask_restful import Resource, reqparse
-from models.Models import CategoryModel, AuthorModel, BookModel, PublisherModel, db
+from models.LibraryModels import CategoryModel, AuthorModel, BookModel, PublisherModel
 
 
 ALLOWED_IMAGE_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
@@ -15,9 +14,14 @@ CONFIG = toml.load("./config.toml")
 UPLOAD_FOLDER = "/".join(CONFIG.get("file").get("path"))
 
 
-def allowed_image(filename):
-    return '.' in filename and \
-           filename.rsplit('.', 1)[1].lower() in ALLOWED_IMAGE_EXTENSIONS
+def check_image(image_name):
+    print(image_name)
+    if '.' in image_name and \
+           image_name.rsplit('.', 1)[1].lower() in ALLOWED_IMAGE_EXTENSIONS:
+        return f"{uuid.uuid1()}.{image_name.split('.')[1]}"
+    else:
+        return ""
+
 
 def date_type(x): return datetime.strptime(x, '%d/%m/%Y')
 
@@ -36,11 +40,19 @@ class Author(Resource):
             'about', type=str, help="You need to provide an about for the author", required=True)
         parser.add_argument('birth_date', type=date_type, default=None)
         parser.add_argument('death_date', type=date_type, default=None)
+        parser.add_argument('author_image', type=werkzeug.datastructures.FileStorage, location='files',
+                    help=f"You must provide an image for the author, allowed extensions are {','.join(ALLOWED_IMAGE_EXTENSIONS)}", required=True)
         data = parser.parse_args()
+        filename = check_image(data['author_image'].filename)
+        if not filename:
+            return {'message': f"Given file cant be processed,allowed extensions are {','.join(ALLOWED_IMAGE_EXTENSIONS)}"}, 400
+        
         author = AuthorModel(
-            name=data['name'], about=data['about'], birth_date=data['birth_date'], death_date=data['death_date'])
+            name=data['name'], about=data['about'], birth_date=data['birth_date'], death_date=data['death_date'], author_image=filename)
         db.session.add(author)
         db.session.commit()
+        data['author_image'].save(os.path.join(UPLOAD_FOLDER, filename))
+
         return {'data': {"author": author.to_dict()}}, 201
 
 
@@ -86,11 +98,12 @@ class Book(Resource):
         parser = reqparse.RequestParser()
         parser.add_argument(
             'name', type=str, help="Name field is required", required=True)
+        parser.add_argument('amount', type=int, default=1)
         parser.add_argument('author_id', type=int,
                             help="You must provide an author", required=True)
         parser.add_argument('category_id', type=int,
                             help="You must provide a category", required=True)
-        
+
         parser.add_argument('published_date', type=date_type, default=None,
                             help="Date doesn't match day/month/year format")
         parser.add_argument('book_cover', type=werkzeug.datastructures.FileStorage, location='files',
@@ -104,9 +117,8 @@ class Book(Resource):
         publisher = data['publisher_id']
         published_date = data['published_date']
 
-        if allowed_image(data['book_cover'].filename):
-            filename = f"{uuid.uuid1()}.{data['book_cover'].filename.split('.')[1]}"
-        else:
+        filename = check_image(data['book_cover'].filename)
+        if not filename:
             return {'message': f"Given file cant be processed,allowed extensions are {','.join(ALLOWED_IMAGE_EXTENSIONS)}"}, 400
 
         author = AuthorModel.query.filter_by(id=data['author_id']).first_or_404(
@@ -119,7 +131,7 @@ class Book(Resource):
                 description=f"Publisher with id {publisher} is not found")
 
         new_book = BookModel(name=data['name'], published_date=published_date, description=data['description'],
-                             author=author, category=category, book_cover=filename, publisher=publisher)
+                             author=author, category=category, book_cover=filename, publisher=publisher, amount=data.get["amount"])
         try:
             db.session.add(new_book)
             db.session.commit()

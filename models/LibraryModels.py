@@ -1,4 +1,4 @@
-from db.database import db
+from initialize import db
 from sqlalchemy_serializer import SerializerMixin
 
 
@@ -10,6 +10,7 @@ class AuthorModel(db.Model, SerializerMixin):
     about = db.Column(db.String, nullable=False)
     birth_date = db.Column(db.DateTime, nullable=True)
     death_date = db.Column(db.DateTime, nullable=True)
+    author_image = db.Column(db.String, unique=True, nullable=False)
 
     def __repr__(self):
         return '<Author %r>' % self.name
@@ -39,6 +40,7 @@ class BookModel(db.Model, SerializerMixin):
     published_date = db.Column(db.DateTime, nullable=True)
     book_cover = db.Column(db.String, unique=True, nullable=False)
     description = db.Column(db.String, nullable=False)
+    amount = db.Column(db.Integer, default=1, nullable=False)
     author = db.relationship("AuthorModel")
     category = db.relationship("CategoryModel")
     publisher = db.relationship("PublisherModel")
