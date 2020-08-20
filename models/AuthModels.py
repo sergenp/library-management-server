@@ -23,6 +23,9 @@ class UserModel(db.Model, SerializerMixin):
         ).decode()
         self.registered_on = datetime.datetime.now()
 
+    def check_password(self, password):
+        return bcrypt.check_password_hash(self.password, password)
+        
     @staticmethod
     def encode_auth_token(user_id):
         """
