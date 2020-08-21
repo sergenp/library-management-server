@@ -1,7 +1,8 @@
 import os
-from flask import send_from_directory
+from flask import send_from_directory, Response
 from flask_admin.contrib.sqla import ModelView
-from initialize import app, api, admin, db
+from werkzeug.exceptions import HTTPException
+from initialize import app, api, admin, db, basic_auth
 # importing Resources is important. Whatever Database model the resource has will get created using flask db migrate/upgrade. Otherwise models wont be added/updated in the database
 from api.LibraryResources import Book, Author, Category, Publisher, BookModel, AuthorModel, CategoryModel, PublisherModel
 from api.AuthResources import User, Register, Login, UserModel
@@ -16,12 +17,26 @@ api.add_resource(User, '/users/<int:user_id>', '/users')
 api.add_resource(Register, '/register')
 api.add_resource(Login, '/login')
 
+
+class AdminPageModelView(ModelView):
+    def is_accessible(self):
+        if not basic_auth.authenticate():
+            raise HTTPException("Login Required", Response(
+             "Login Required", 401,
+             {'WWW-Authenticate': 'Basic realm="Login Required"'}
+        ))
+        else:
+            return True
+            
+    def inaccessible_callback(self, name, **kwargs):
+        return redirect(basic_auth.challenge())
+
 # ADMIN PAGES
-admin.add_view(ModelView(UserModel, db.session))
-admin.add_view(ModelView(BookModel, db.session))
-admin.add_view(ModelView(AuthorModel, db.session))
-admin.add_view(ModelView(CategoryModel, db.session))
-admin.add_view(ModelView(PublisherModel, db.session))
+admin.add_view(AdminPageModelView(UserModel, db.session))
+admin.add_view(AdminPageModelView(BookModel, db.session))
+admin.add_view(AdminPageModelView(AuthorModel, db.session))
+admin.add_view(AdminPageModelView(CategoryModel, db.session))
+admin.add_view(AdminPageModelView(PublisherModel, db.session))
 
 @app.route('/files/<path:filename>')
 def uploaded_file(filename):

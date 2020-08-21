@@ -10,7 +10,7 @@ class AuthorModel(db.Model, SerializerMixin):
     about = db.Column(db.String, nullable=False)
     birth_date = db.Column(db.DateTime, nullable=True)
     death_date = db.Column(db.DateTime, nullable=True)
-    author_image = db.Column(db.String, unique=True, nullable=False)
+    author_image = db.Column(db.String, unique=False, nullable=False, default="default_user_image.jpg")
 
     def __repr__(self):
         return '<Author %r>' % self.name

@@ -16,6 +16,7 @@ sqlalchemy-serializer = "*"
 flask-bcrypt = "*"
 pyjwt = "*"
 flask-admin = "*"
+flask-basicauth = "*"
 
 [requires]
 python_version = "3.8"
