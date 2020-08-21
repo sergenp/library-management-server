@@ -1,6 +1,6 @@
 from flask_restful import Resource, reqparse
 from models.AuthModels import UserModel, db, config, bcrypt
-from .resource_util import ALLOWED_IMAGE_EXTENSIONS, UPLOAD_FOLDER, check_image, date_type
+from .resource_util import ALLOWED_IMAGE_EXTENSIONS, UPLOAD_FOLDER, check_image, date_type, email_type
 from sqlalchemy import exc
 
 
@@ -16,7 +16,7 @@ class Register(Resource):
         parser = reqparse.RequestParser()
         parser.add_argument(
             'username', type=str, help="Username field is required", required=True)
-        parser.add_argument('email', type=str, required=True)
+        parser.add_argument('email', type=email_type, required=True, help="Given email is invalid")
         parser.add_argument('password', type=str, required=True)
         data = parser.parse_args()
         try:
