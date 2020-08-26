@@ -1,5 +1,5 @@
 import os
-from flask import send_from_directory, Response
+from flask import send_from_directory, Response, redirect
 from flask_admin.contrib.sqla import ModelView
 from werkzeug.exceptions import HTTPException
 from initialize import app, api, admin, db, basic_auth

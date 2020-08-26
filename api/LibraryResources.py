@@ -1,8 +1,6 @@
 import os
 import werkzeug
 import toml
-import uuid
-from datetime import datetime
 from sqlalchemy.exc import IntegrityError
 from werkzeug.utils import secure_filename
 from flask_restful import Resource, reqparse
