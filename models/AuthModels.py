@@ -1,7 +1,6 @@
 import datetime
 from initialize import app, db, bcrypt, config
 from sqlalchemy_serializer import SerializerMixin
-import jwt
 
 class UserModel(db.Model, SerializerMixin):
     __tablename__ ="users"
@@ -25,41 +24,16 @@ class UserModel(db.Model, SerializerMixin):
 
     def check_password(self, password):
         return bcrypt.check_password_hash(self.password, password)
-        
-    @staticmethod
-    def encode_auth_token(user_id):
-        """
-        Generates the Auth Token
-        :return: string
-        """
-        try:
-            payload = {
-                'exp': datetime.datetime.utcnow() + datetime.timedelta(days=0, hours=4),
-                'iat': datetime.datetime.utcnow(),
-                'sub': user_id
-            }
-            return jwt.encode(
-                payload,
-                app.config.get('SECRET_KEY'),
-                algorithm='HS256'
-            ).decode('utf-8')
-        except Exception as e:
-            return e
-    
-    @staticmethod
-    def decode_auth_token(auth_token):
-        """
-        Decodes the auth token
-        :param auth_token:
-        :return: integer|string
-        """
-        try:
-            payload = jwt.decode(auth_token, app.config.get('SECRET_KEY'))
-            return payload['sub']
-        except jwt.ExpiredSignatureError:
-            return 'Signature expired. Please log in again.'
-        except jwt.InvalidTokenError:
-            return 'Invalid token. Please log in again.'
 
     def __repr__(self):
         return '<User %r>' % self.id
+
+class RevokedTokenModel(db.Model):
+    __tablename__ = 'revoked_tokens'
+    id = db.Column(db.Integer, primary_key = True)
+    jti = db.Column(db.String(120))
+    
+    @classmethod
+    def is_jti_blacklisted(cls, jti):
+        query = cls.query.filter_by(jti = jti).first()
+        return bool(query)

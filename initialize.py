@@ -7,22 +7,17 @@ from flask_bcrypt import Bcrypt
 from flask_restful import Api
 from flask_admin import Admin
 from flask_basicauth import BasicAuth
+from flask_jwt_extended import JWTManager
 
-config = toml.load('./config.toml')
+config = toml.load('config.toml')
 app = Flask(config.get("app_name", __name__))
 
 # APP CONFIGS
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(
     os.path.abspath(os.path.dirname(__file__)), *config.get("database").get("path"))
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app_configs = config.get('app_configs')
 app.config['UPLOAD_FOLDER'] = os.path.join(*config.get("file").get("path"))
-app.config['BUNDLE_ERRORS'] = app_configs.get("bundle_errors")
-app.config['SECRET_KEY'] = app_configs.get("secret_key")
-app.config['DEBUG_MODE'] = app_configs.get("debug_mode")
-app.config['PORT'] = app_configs.get("port")
-app.config['BASIC_AUTH_USERNAME'] = app_configs.get("admin_username")
-app.config['BASIC_AUTH_PASSWORD'] = app_configs.get("admin_password")
+app.config.update(config.get('app_configs'))
 
 # APP EXTENSIONS
 db = SQLAlchemy(app)
@@ -31,3 +26,4 @@ bcrypt = Bcrypt(app)
 api = Api(app)
 admin = Admin(app, name=config.get("app_name", __name__), template_mode='bootstrap3')
 basic_auth = BasicAuth(app)
+jwt = JWTManager(app)

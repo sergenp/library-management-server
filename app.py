@@ -2,11 +2,10 @@ import os
 from flask import send_from_directory, Response, redirect
 from flask_admin.contrib.sqla import ModelView
 from werkzeug.exceptions import HTTPException
-from initialize import app, api, admin, db, basic_auth
+from initialize import app, api, admin, db, basic_auth, jwt
 # importing Resources is important. Whatever Database model the resource has will get created using flask db migrate/upgrade. Otherwise models wont be added/updated in the database
 from api.LibraryResources import Book, Author, Category, Publisher, BookModel, AuthorModel, CategoryModel, PublisherModel
-from api.AuthResources import User, Register, Login, UserModel
-
+from api.AuthResources import User, Register, Login, LogoutAccess, LogoutRefresh, TokenRefresh, RevokedTokenModel, UserModel
 
 # API ENDPOINTS
 api.add_resource(Book, '/books/<int:book_id>', '/books')
@@ -16,7 +15,9 @@ api.add_resource(Publisher, '/publishers/<int:publisher_id>', '/publishers')
 api.add_resource(User, '/users/<int:user_id>', '/users')
 api.add_resource(Register, '/register')
 api.add_resource(Login, '/login')
-
+api.add_resource(LogoutAccess, '/logoutaccess')
+api.add_resource(LogoutRefresh, '/logoutrefresh')
+api.add_resource(TokenRefresh, '/refreshtoken')
 
 class AdminPageModelView(ModelView):
     def is_accessible(self):
@@ -37,6 +38,7 @@ admin.add_view(AdminPageModelView(BookModel, db.session))
 admin.add_view(AdminPageModelView(AuthorModel, db.session))
 admin.add_view(AdminPageModelView(CategoryModel, db.session))
 admin.add_view(AdminPageModelView(PublisherModel, db.session))
+admin.add_view(AdminPageModelView(RevokedTokenModel, db.session))
 
 @app.route('/files/<path:filename>')
 def uploaded_file(filename):
@@ -44,5 +46,10 @@ def uploaded_file(filename):
                                filename)
 
 
+@jwt.token_in_blacklist_loader
+def check_if_token_in_blacklist(decrypted_token):
+    jti = decrypted_token['jti']
+    return RevokedTokenModel.is_jti_blacklisted(jti)
+
 if __name__ == '__main__':
-    app.run(debug=app.config['DEBUG_MODE'], port=app.config['PORT'])
+    app.run()

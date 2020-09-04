@@ -14,9 +14,10 @@ toml = "*"
 flask-sqlalchemy = "*"
 sqlalchemy-serializer = "*"
 flask-bcrypt = "*"
-pyjwt = "*"
 flask-admin = "*"
 flask-basicauth = "*"
+flask-jwt-extended = "*"
+pyjwt = "*"
 
 [requires]
 python_version = "3.8"

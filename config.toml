@@ -12,17 +12,21 @@ user = ""
 password = ""
 
 [file]
-path = ["./files"] # files path that files are going to be saved, relative to Resources.py
+path = ["./files"] # files path that files are going to be saved, relative to Resources(LibraryResources.py)
 
 [app_configs]
 # for bundling errors, if post requests fails, 
 # see https://flask-restful.readthedocs.io/en/latest/reqparse.html#error-handling
-bundle_errors = true
-debug_mode = true
-secret_key = '_5#y2L"F4Q8z\n\xec]/' # change me in production environment
-port=5000
-admin_username = "admin"
-admin_password = "admin"
+ENV = "development"
+BUNDLE_ERRORS = true
+DEBUG = true # change me in production environment
+SECRET_KEY = '_5#y2L"F4Q8z\n\xec]/' # change me in production environment
+PORT=5000
+JWT_SECRET_TOKEN = "a0f1490a20d0211c997b44bc357e1972deab8ae3"
+JWT_BLACKLIST_ENABLED = true
+JWT_BLACKLIST_TOKEN_CHECKS = ['access', 'refresh']
+BASIC_AUTH_USERNAME = "admin"
+BASIC_AUTH_PASSWORD = "admin"
 
 [bcrypt]
 bcrypt_log_rounds = 10

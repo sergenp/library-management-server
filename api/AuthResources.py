@@ -1,8 +1,8 @@
+from flask_jwt_extended import create_access_token, create_refresh_token, jwt_refresh_token_required, get_jwt_identity, get_raw_jwt, jwt_required
 from flask_restful import Resource, reqparse
-from models.AuthModels import UserModel, db, config, bcrypt
+from models.AuthModels import UserModel, RevokedTokenModel, db, config, bcrypt
 from .resource_util import ALLOWED_IMAGE_EXTENSIONS, UPLOAD_FOLDER, check_image, date_type, email_type
 from sqlalchemy import exc
-
 
 class User(Resource):
     def get(self, user_id):
@@ -27,7 +27,11 @@ class Register(Resource):
         except exc.IntegrityError:
             db.session.rollback()
             return {'message': 'Given username or email already exists'}, 400
-        return {'data': {"user": user.to_dict(only=("id",)), "token": UserModel.encode_auth_token(user.id)}}, 201
+        
+        
+        access_token = create_access_token(identity=data['username'])
+        refresh_token = create_refresh_token(identity=data['username'])
+        return {'data': {"user": user.to_dict(only=("id",)), "access_token": access_token, "refresh_token" : refresh_token }}, 201
 
 class Login(Resource):
     def post(self):
@@ -39,6 +43,37 @@ class Login(Resource):
         if user:
             password = user.check_password(data["password"])
             if password:
-                return {'data': {"user": user.to_dict(only=("id",)), "token": UserModel.encode_auth_token(user.id)}}, 201
+                access_token = create_access_token(identity=data['username'])
+                refresh_token = create_refresh_token(identity=data['username'])
+                return {'data': {"user": user.to_dict(only=("id",)), "access_token": access_token, "refresh_token" : refresh_token }}, 200
         return {'message' : 'Authentication failed, please check your username/password'}, 400
         
+class TokenRefresh(Resource):
+    @jwt_refresh_token_required
+    def post(self):
+        current_user = get_jwt_identity()
+        access_token = create_access_token(identity=current_user)
+        return {'access_token': access_token}
+
+class LogoutAccess(Resource):
+    @jwt_required
+    def post(self):
+        jti = get_raw_jwt()['jti']
+        print(jti)
+        try:
+            db.session.add(RevokedTokenModel(jti = jti))
+            db.session.commit()
+            return {'message': 'Access token has been revoked'}
+        except:
+            return {'message': 'Something went wrong'}, 500
+
+class LogoutRefresh(Resource):
+    @jwt_refresh_token_required
+    def post(self):
+        jti = get_raw_jwt()['jti']
+        try:
+            db.session.add(RevokedTokenModel(jti = jti))
+            db.session.commit()
+            return {'message': 'Refresh token has been revoked'}
+        except:
+            return {'message': 'Something went wrong'}, 500
