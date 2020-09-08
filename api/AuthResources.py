@@ -5,9 +5,11 @@ from .resource_util import ALLOWED_IMAGE_EXTENSIONS, UPLOAD_FOLDER, check_image,
 from sqlalchemy import exc
 
 class User(Resource):
-    def get(self, user_id):
-        user = UserModel.query.get_or_404(
-            user_id, description="User is not found")
+    @jwt_required
+    def get(self):
+        current_user = get_jwt_identity()
+        user = UserModel.query.filter_by(username=current_user).first_or_404(
+            description=f"User not found")
         return {'data': {'user': user.to_dict()}}, 200
 
 
@@ -31,7 +33,7 @@ class Register(Resource):
         
         access_token = create_access_token(identity=data['username'])
         refresh_token = create_refresh_token(identity=data['username'])
-        return {'data': {"user": user.to_dict(only=("id",)), "access_token": access_token, "refresh_token" : refresh_token }}, 201
+        return {'data': {"user": user.to_dict(), "access_token": access_token, "refresh_token" : refresh_token }}, 201
 
 class Login(Resource):
     def post(self):
@@ -45,7 +47,7 @@ class Login(Resource):
             if password:
                 access_token = create_access_token(identity=data['username'])
                 refresh_token = create_refresh_token(identity=data['username'])
-                return {'data': {"user": user.to_dict(only=("id",)), "access_token": access_token, "refresh_token" : refresh_token }}, 200
+                return {'data': {"user": user.to_dict(), "access_token": access_token, "refresh_token" : refresh_token }}, 200
         return {'message' : 'Authentication failed, please check your username/password'}, 400
         
 class TokenRefresh(Resource):
@@ -59,7 +61,6 @@ class LogoutAccess(Resource):
     @jwt_required
     def post(self):
         jti = get_raw_jwt()['jti']
-        print(jti)
         try:
             db.session.add(RevokedTokenModel(jti = jti))
             db.session.commit()

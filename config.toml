@@ -22,9 +22,10 @@ BUNDLE_ERRORS = true
 DEBUG = true # change me in production environment
 SECRET_KEY = '_5#y2L"F4Q8z\n\xec]/' # change me in production environment
 PORT=5000
-JWT_SECRET_TOKEN = "a0f1490a20d0211c997b44bc357e1972deab8ae3"
+JWT_SECRET_KEY = "a0f1490a20d0211c997b44bc357e1972deab8ae3"
 JWT_BLACKLIST_ENABLED = true
 JWT_BLACKLIST_TOKEN_CHECKS = ['access', 'refresh']
+JWT_ACCESS_TOKEN_EXPIRES = 1800 # access tokens expires in 1800 seconds (30 minutes)
 BASIC_AUTH_USERNAME = "admin"
 BASIC_AUTH_PASSWORD = "admin"
 

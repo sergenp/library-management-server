@@ -4,7 +4,8 @@ import toml
 from sqlalchemy.exc import IntegrityError
 from werkzeug.utils import secure_filename
 from flask_restful import Resource, reqparse
-from models.LibraryModels import CategoryModel, AuthorModel, BookModel, PublisherModel
+from flask_jwt_extended import jwt_required, get_jwt_identity
+from models.LibraryModels import db, CategoryModel, AuthorModel, BookModel, PublisherModel
 from .resource_util import UPLOAD_FOLDER, ALLOWED_IMAGE_EXTENSIONS, check_image, date_type
 
 class Author(Resource):
@@ -12,7 +13,8 @@ class Author(Resource):
         author = AuthorModel.query.get_or_404(
             author_id, description="Author is not found")
         return {'data': {'author': author.to_dict()}}, 200
-
+    
+    @jwt_required
     def post(self):
         parser = reqparse.RequestParser()
         parser.add_argument(
@@ -43,6 +45,7 @@ class Category(Resource):
             category_id, description="Category is not found")
         return {'data': {'category': category.to_dict()}}, 200
 
+    @jwt_required
     def post(self):
         parser = reqparse.RequestParser()
         parser.add_argument('name', type=str, help="name field is required")
@@ -59,6 +62,7 @@ class Publisher(Resource):
             publisher_id, description="Publisher is not found")
         return {'data': {'publisher': publisher.to_dict()}}, 200
 
+    @jwt_required
     def post(self):
         parser = reqparse.RequestParser()
         parser.add_argument('name', type=str, help="name field is required")
@@ -75,6 +79,7 @@ class Book(Resource):
             book_id, description="Book is not found")
         return {'data': {'book': book.to_dict()}}, 200
 
+    @jwt_required
     def post(self):
         parser = reqparse.RequestParser()
         parser.add_argument(

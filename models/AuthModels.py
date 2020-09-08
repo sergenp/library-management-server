@@ -5,6 +5,8 @@ from sqlalchemy_serializer import SerializerMixin
 class UserModel(db.Model, SerializerMixin):
     __tablename__ ="users"
 
+    serialize_only = ('id','username','about','birth_date','user_image','email','registered_on')
+
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String, unique=True, nullable=False)
     about = db.Column(db.String)
